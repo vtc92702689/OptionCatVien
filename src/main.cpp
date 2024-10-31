@@ -1,7 +1,5 @@
 #include <Arduino.h>
-#include <Wire.h>
 #include <U8g2lib.h>
-#include <Preferences.h>
 #include <ArduinoJson.h>
 #include <OneButton.h>
 #include <LittleFS.h>
@@ -200,6 +198,10 @@ OneButton btnMenu(32, false,false);
 OneButton btnSet(33, false,false);
 OneButton btnUp(34, false,false);
 OneButton btnDown(35, false,false);
+const int btnESTOP = 14;
+const int btnRun = 27;
+const int ssDiemGocMotorQuay =
+
 
 const char* menu1;
 const char* menu2;
