@@ -210,10 +210,6 @@ const int sensorFabric = 16;
 const int outRelayCut = 25;
 const int outRelayAir = 26;
 
-
-// thêm để commit
-
-
 int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
 int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
 int pIndex = 1;
@@ -225,10 +221,12 @@ int maxLength = 0; //Số kí tự hiển thị trên func showSetup
 int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 = chục, ...)
 int currentValue;
 
-OneButton btnMenu(32, false,false); 
-OneButton btnSet(33, false,false);
-OneButton btnUp(34, false,false);
-OneButton btnDown(35, false,false);
+OneButton btnMenu(34, false,false);
+OneButton btnSet(35, false,false);
+OneButton btnUp(36, false,false);
+OneButton btnDown(39, false,false);
+OneButton btnRun(32,false,false);
+OneButton btnEstop(33,false,false);
 
 bool explanationMode; //logic chức năng diễn giải
 
@@ -242,6 +240,7 @@ String valueStr;
 String textStr;
 String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
+
 
 bool isNumeric(const char* str) {
   // Chuỗi rỗng không được coi là số
@@ -281,6 +280,27 @@ void splitString(const String& input, String* output, int maxParts) {
     output[partCount++] = input.substring(startIndex, commaIndex);
     startIndex = commaIndex + 1; // Cập nhật vị trí bắt đầu
   }
+}
+
+bool WaitMillis(unsigned long thoiDiemCuoi, unsigned long waitTime) {
+  return (millis() - thoiDiemCuoi > waitTime);
+}
+
+bool WaitMicros(unsigned long thoiDiemCuoi, unsigned long waitTime) {
+  return (micros() - thoiDiemCuoi > waitTime);
+}
+
+void drawCenteredText(const char* text, int y) {
+  int screenWidth = u8g2.getDisplayWidth();
+  
+  // Đo độ rộng của chuỗi
+  int textWidth = u8g2.getStrWidth(text);
+  
+  // Tính toán vị trí x để căn giữa
+  int x = (screenWidth - textWidth) / 2;
+
+  u8g2.setFont(u8g2_font_ncenB14_tr); // Chọn font chữ
+  u8g2.drawStr(x, y, text);           // Vẽ chuỗi căn giữa
 }
 
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
@@ -345,6 +365,17 @@ void showList(int indexNum){
   u8g2.drawStr(12, 48, menu3);  // Hiển thị danh mục 3
 
   u8g2.drawStr(0, indexNum * 16, ">");  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
+  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
+}
+
+void showText(const char* title, const char* messenger){
+  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
+  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
+
+  drawCenteredText(title,18);
+  
+  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
+  wrapText(messenger, 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
@@ -653,6 +684,164 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+// TỔNG HỢP THAM SỐ CÀI ĐẶT
+
+int thoiGianNhaDao = 200;
+byte cheDoHoatDong = 1;
+int soDuMuiDauVao = 10;
+int soDuMuiDauRa = 20;
+byte cheDoThoiHoi = 1;
+int thoiGianThoiHoiDauVao = 1000;
+int thoiGianThoiHoiDauRa = 3000;
+int thoiGianThoiHoiKhiChay = 5000;
+
+// TỔNG HỢP THAM SỐ Ghi Nhớ
+int mainStep = 0;
+int soMuiChiTrongChuKi = 0;
+int muiChiCuoiCungThayDoiTrangThai = 0;
+int muiChiKetThucChuki = 0;
+
+bool catDauVaoChuKi = false;
+bool catDauRaChuKi = false;
+bool thoiDauVaoChuKi = false;
+bool thoiDauRaChuKi = false;
+bool lastStatusFabricSensor = false;
+bool lastStatusCountSensor = false;
+bool trangThaiNhanVai = false;
+unsigned long thoiDiemCuoiDaoCat;
+unsigned long thoiDiemCuoiThoiHoi;
+int doTreThoiHoi;
+
+void funcKichHoatDaoCat(){
+  thoiDiemCuoiDaoCat = millis();
+  digitalWrite(outRelayCut,HIGH);
+}
+void funcCut() {
+  if (WaitMillis(thoiDiemCuoiDaoCat,thoiGianNhaDao)){
+    digitalWrite(outRelayCut,LOW);
+  }
+}
+void funcKichHoatThoiHoi(int timer){
+  doTreThoiHoi = timer;
+  thoiDiemCuoiThoiHoi = millis();
+  digitalWrite(outRelayAir,HIGH);
+}
+void funcBlowAir() {
+  if (WaitMillis(thoiDiemCuoiThoiHoi,doTreThoiHoi)){
+    digitalWrite(outRelayAir,LOW);
+  }
+}
+
+void funcFabricSensor(){
+  bool statusFabricSensor = digitalRead(sensorFabric);
+  if (statusFabricSensor != lastStatusFabricSensor){
+    if (statusFabricSensor && mainStep == 0){
+      mainStep = 1;
+      soMuiChiTrongChuKi = 0;
+      log("Khởi tạo chu kì");
+      log("bước là: " + String(mainStep));
+    } else if (statusFabricSensor){
+      trangThaiNhanVai = true;
+      log("Nhận vải");
+    } else {
+      trangThaiNhanVai = false;
+      log("Không có vải");
+    }
+    muiChiCuoiCungThayDoiTrangThai = soMuiChiTrongChuKi;
+    log("Mũi cuối thay đổi trạng thái là: " + String(muiChiCuoiCungThayDoiTrangThai));
+    lastStatusFabricSensor = statusFabricSensor;
+  }
+}
+
+void funcCountSensor(){
+  bool statusCountSensor = digitalRead(sensorCount);
+  if (statusCountSensor != lastStatusCountSensor){
+    if (statusCountSensor){
+      soMuiChiTrongChuKi ++;
+      log("số mũi chỉ trong chu kì là: " + String(soMuiChiTrongChuKi));
+      log("bước là: " + String(mainStep));
+    }
+    lastStatusCountSensor = statusCountSensor;
+  }
+}
+
+void mainRun(){
+  switch (mainStep) {
+    case 0:
+      break;
+
+    case 1: 
+      if (cheDoHoatDong == 1 || cheDoHoatDong == 2 ) {
+        if (!catDauVaoChuKi){
+          if (soMuiChiTrongChuKi == soDuMuiDauVao){
+            funcKichHoatDaoCat();
+            log("Cắt đầu vào");
+            catDauVaoChuKi = true;
+          }
+        }
+      } else {
+        catDauVaoChuKi = true;
+      }
+      if (cheDoThoiHoi == 1 || cheDoThoiHoi == 2) {
+        if (!thoiDauVaoChuKi){
+          funcKichHoatThoiHoi(thoiGianThoiHoiDauVao);
+          log("Thổi đầu vào");
+          thoiDauVaoChuKi = true;
+        }
+      } else {
+        thoiDauVaoChuKi = true;
+      }
+      if (catDauVaoChuKi && thoiDauVaoChuKi){
+        mainStep ++;
+      }
+      break;
+
+    case 2:
+      if (cheDoThoiHoi == 4){
+        funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
+        log("Thổi khi may");
+      }
+      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > 2 && !trangThaiNhanVai){
+        muiChiKetThucChuki = soMuiChiTrongChuKi;
+        mainStep ++;
+      }
+      break;
+
+    case 3:
+      if (cheDoHoatDong == 1 || cheDoHoatDong == 3){
+        if (!catDauRaChuKi){
+          if (soMuiChiTrongChuKi - muiChiKetThucChuki == soDuMuiDauRa){
+            funcKichHoatDaoCat();
+            log("Cắt đầu ra");
+            catDauRaChuKi = true;
+          }
+        }
+      } else {
+        catDauRaChuKi = true;
+      }
+      if (cheDoThoiHoi == 1 || cheDoThoiHoi == 3){
+        if (!thoiDauRaChuKi){
+          funcKichHoatThoiHoi(thoiGianThoiHoiDauRa);
+          log("Thổi đầu ra");
+          thoiDauRaChuKi = true;
+        }
+      } else {
+        thoiDauRaChuKi = true;
+      }
+      if (thoiDauRaChuKi && catDauRaChuKi){
+        mainStep = 0;
+        catDauVaoChuKi = false;
+        catDauRaChuKi = false;
+        thoiDauVaoChuKi = false;
+        thoiDauRaChuKi = false;
+      }
+      break;
+  }
+
+  funcBlowAir();
+  funcCut();
+}
+
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
@@ -684,6 +873,11 @@ void setup() {
   btnSet.setPressMs(btnSetPressMill);
   btnUp.setPressMs(btnSetPressMill);
   btnDown.setPressMs(btnSetPressMill);
+
+  pinMode(sensorFabric, INPUT);
+  pinMode(sensorCount, INPUT);
+  pinMode(outRelayCut, OUTPUT);
+  pinMode(outRelayAir, OUTPUT);
 
   if (!LittleFS.begin()) {
     showSetup("Error", "E003", "LittleFS Mount Failed");
@@ -753,5 +947,8 @@ void loop() {
   btnMenu.tick();
   btnSet.tick();
   btnUp.tick();
-  btnDown.tick(); 
+  btnDown.tick();
+  funcFabricSensor();
+  funcCountSensor();
+  mainRun();
 }
