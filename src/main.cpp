@@ -17,7 +17,7 @@ const char* jsonString = R"({
       "children": {
         "CD1": {
           "key": "CD1",
-          "text": "Text1",
+          "text": "Che do hoat dong",
           "defaultValue": 1,
           "configuredValue": 1,
           "minValue": 1,
@@ -25,15 +25,15 @@ const char* jsonString = R"({
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": true,
-          "explanationDetails": "Mode1,Mode2,Mode3"
+          "explanationDetails": "Vao&Ra,D.Vao,D.Ra"
         },
         "CD2": {
           "key": "CD2",
-          "text": "Text2",
-          "defaultValue": 100,
-          "configuredValue": 100,
+          "text": "Do tre dao - mili giay",
+          "defaultValue": 150,
+          "configuredValue": 150,
           "minValue": 1,
-          "maxValue": 1000,
+          "maxValue": 10000,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -41,11 +41,11 @@ const char* jsonString = R"({
         },
         "CD3": {
           "key": "CD3",
-          "text": "Text3",
-          "defaultValue": 200,
-          "configuredValue": 200,
+          "text": "Do tre dau cat vao - mui kim",
+          "defaultValue": 10,
+          "configuredValue": 10,
           "minValue": 1,
-          "maxValue": 1000,
+          "maxValue": 10000,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -53,9 +53,9 @@ const char* jsonString = R"({
         },
         "CD4": {
           "key": "CD4",
-          "text": "Text4",
-          "defaultValue": 300,
-          "configuredValue": 300,
+          "text": "Do tre cat dau ra - mui kim",
+          "defaultValue": 10,
+          "configuredValue": 10,
           "minValue": 1,
           "maxValue": 1000,
           "accessAllowed": true,
@@ -65,23 +65,23 @@ const char* jsonString = R"({
         },
         "CD5": {
           "key": "CD5",
-          "text": "Text5",
-          "defaultValue": 400,
-          "configuredValue": 400,
+          "text": "Che do thoi hoi",
+          "defaultValue": 1,
+          "configuredValue": 1,
           "minValue": 1,
-          "maxValue": 1000,
+          "maxValue": 4,
           "accessAllowed": true,
           "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
+          "explanationMode": true,
+          "explanationDetails": "Vao&Ra,D.Vao,D.Ra,Full"
         },
         "CD6": {
           "key": "CD6",
-          "text": "Text6",
-          "defaultValue": 500,
-          "configuredValue": 500,
-          "minValue": 1,
-          "maxValue": 1000,
+          "text": "Do tre thoi hoi dau vao",
+          "defaultValue": 1500,
+          "configuredValue": 1500,
+          "minValue": 100,
+          "maxValue": 10000,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -89,11 +89,11 @@ const char* jsonString = R"({
         },
         "CD7": {
           "key": "CD7",
-          "text": "Text7",
-          "defaultValue": 600,
-          "configuredValue": 600,
-          "minValue": 1,
-          "maxValue": 1000,
+          "text": "Do tre thoi hoi dau ra",
+          "defaultValue": 1500,
+          "configuredValue": 1500,
+          "minValue": 100,
+          "maxValue": 10000,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -101,11 +101,11 @@ const char* jsonString = R"({
         },
         "CD8": {
           "key": "CD8",
-          "text": "Text8",
-          "defaultValue": 700,
-          "configuredValue": 700,
-          "minValue": 1,
-          "maxValue": 1000,
+          "text": "Do tre thoi hoi khi may",
+          "defaultValue": 1500,
+          "configuredValue": 1500,
+          "minValue": 100,
+          "maxValue": 10000,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -113,30 +113,18 @@ const char* jsonString = R"({
         },
         "CD9": {
           "key": "CD9",
-          "text": "Text9",
-          "defaultValue": 800,
-          "configuredValue": 800,
+          "text": "So mui chong nhieu",
+          "defaultValue": 2,
+          "configuredValue": 2,
           "minValue": 1,
-          "maxValue": 1000,
-          "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "CD10": {
-          "key": "CD10",
-          "text": "Text10",
-          "defaultValue": 900,
-          "configuredValue": 900,
-          "minValue": 1,
-          "maxValue": 1000,
+          "maxValue": 10,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
           "explanationDetails": ""
         }
       },
-      "totalChildren": 10
+      "totalChildren": 9
     },
     "main2": {
       "text": "CHUC NANG",
@@ -148,7 +136,7 @@ const char* jsonString = R"({
           "defaultValue": 1,
           "configuredValue": 1,
           "minValue": 1,
-          "maxValue": 20,
+          "maxValue": 1,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -160,7 +148,7 @@ const char* jsonString = R"({
           "defaultValue": 1,
           "configuredValue": 1,
           "minValue": 1,
-          "maxValue": 20,
+          "maxValue": 2,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -191,7 +179,7 @@ const char* jsonString = R"({
           "defaultValue": 1,
           "configuredValue": 1,
           "minValue": 1,
-          "maxValue": 20,
+          "maxValue": 1,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -237,10 +225,12 @@ const char* menu3;
 String displayScreen = "MENU";
 String setupCodeStr;
 String valueStr;
+String textExplanationMode;
 String textStr;
 String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
 
+void loadSetup();
 
 bool isNumeric(const char* str) {
   // Chuỗi rỗng không được coi là số
@@ -489,8 +479,9 @@ void loadJsonSettings() {
         if (explanationMode){
           String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
           
-          splitString(listStr, ListExp, 10);
-          textStr = ListExp[currentValue-1];
+          splitString(listStr, ListExp, 10);    // Hàm chuyển đổi String thành list
+          textExplanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>();
+          textStr = textExplanationMode +": " + ListExp[currentValue-1];  // Hiển thị text từ list
         } else {
           textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
         }
@@ -551,7 +542,7 @@ void editValue(const char* Calculations) {
 
     // Kiểm tra chức năng diễn giải có hoạt động hay không, nếu hoạt động thì hiển thị diễn giải
     if (explanationMode){
-      textStr = ListExp[currentValue-1];
+      textStr = textExplanationMode + ": " +ListExp[currentValue-1];
     }
 
     // Gọi lại hàm showEdit để cập nhật màn hình
@@ -608,6 +599,7 @@ void btnSetLongPressStart() {
       jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
       log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
       loadJsonSettings();
+      loadSetup();   
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
       if (setupCodeStr == "CN3" && currentValue == 1){
@@ -684,16 +676,18 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+
 // TỔNG HỢP THAM SỐ CÀI ĐẶT
 
-int thoiGianNhaDao = 200;
 byte cheDoHoatDong = 1;
+int thoiGianNhaDao = 200;
 int soDuMuiDauVao = 10;
 int soDuMuiDauRa = 20;
 byte cheDoThoiHoi = 1;
 int thoiGianThoiHoiDauVao = 1000;
 int thoiGianThoiHoiDauRa = 3000;
 int thoiGianThoiHoiKhiChay = 5000;
+int soMuiChongNhieu = 2;
 
 // TỔNG HỢP THAM SỐ Ghi Nhớ
 int mainStep = 0;
@@ -705,12 +699,40 @@ bool catDauVaoChuKi = false;
 bool catDauRaChuKi = false;
 bool thoiDauVaoChuKi = false;
 bool thoiDauRaChuKi = false;
+bool thoiHoiFull = false;
 bool lastStatusFabricSensor = false;
 bool lastStatusCountSensor = false;
 bool trangThaiNhanVai = false;
+bool ketThucChuKi = false;
 unsigned long thoiDiemCuoiDaoCat;
 unsigned long thoiDiemCuoiThoiHoi;
 int doTreThoiHoi;
+
+int trangThaiHoatDong = 0;
+
+
+void loadSetup(){
+   log("Tải thông số cài đặt");
+   cheDoHoatDong = jsonDoc["main"]["main1"]["children"]["CD1"]["configuredValue"];
+   thoiGianNhaDao = jsonDoc["main"]["main1"]["children"]["CD2"]["configuredValue"];
+   soDuMuiDauVao = jsonDoc["main"]["main1"]["children"]["CD3"]["configuredValue"];
+   soDuMuiDauRa = jsonDoc["main"]["main1"]["children"]["CD4"]["configuredValue"];
+   cheDoThoiHoi = jsonDoc["main"]["main1"]["children"]["CD5"]["configuredValue"];
+   thoiGianThoiHoiDauVao = jsonDoc["main"]["main1"]["children"]["CD6"]["configuredValue"];
+   thoiGianThoiHoiDauRa = jsonDoc["main"]["main1"]["children"]["CD7"]["configuredValue"];
+   thoiGianThoiHoiKhiChay = jsonDoc["main"]["main1"]["children"]["CD8"]["configuredValue"];
+   soMuiChongNhieu = jsonDoc["main"]["main1"]["children"]["CD9"]["configuredValue"];
+   log("cheDoHoatDong :" + String(cheDoHoatDong));
+   log("thoiGianNhaDao :" + String(thoiGianNhaDao));
+   log("soDuMuiDauVao :" + String(soDuMuiDauVao));
+   log("cheDoThoiHoi :" + String(cheDoThoiHoi));
+   log("thoiGianThoiHoiDauVao :" + String(thoiGianThoiHoiDauVao));
+   log("thoiGianThoiHoiDauRa :" + String(thoiGianThoiHoiDauRa));
+   log("thoiGianThoiHoiKhiChay :" + String(thoiGianThoiHoiKhiChay));
+   log("soMuiChongNhieu :" + String(soMuiChongNhieu));
+   trangThaiHoatDong = 1;
+   log("Hoàn thành");
+}
 
 void funcKichHoatDaoCat(){
   thoiDiemCuoiDaoCat = millis();
@@ -729,20 +751,22 @@ void funcKichHoatThoiHoi(int timer){
 void funcBlowAir() {
   if (WaitMillis(thoiDiemCuoiThoiHoi,doTreThoiHoi)){
     digitalWrite(outRelayAir,LOW);
+    thoiHoiFull = false;
   }
 }
 
 void funcFabricSensor(){
   bool statusFabricSensor = digitalRead(sensorFabric);
   if (statusFabricSensor != lastStatusFabricSensor){
-    if (statusFabricSensor && mainStep == 0){
-      mainStep = 1;
-      soMuiChiTrongChuKi = 0;
-      log("Khởi tạo chu kì");
-      log("bước là: " + String(mainStep));
-    } else if (statusFabricSensor){
+    if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && statusFabricSensor){
       trangThaiNhanVai = true;
       log("Nhận vải");
+      if (mainStep == 0){
+        mainStep = 1;
+        soMuiChiTrongChuKi = 0;
+        log("Khởi tạo chu kì");
+        log("bước là: " + String(mainStep)); 
+      }
     } else {
       trangThaiNhanVai = false;
       log("Không có vải");
@@ -760,6 +784,15 @@ void funcCountSensor(){
       soMuiChiTrongChuKi ++;
       log("số mũi chỉ trong chu kì là: " + String(soMuiChiTrongChuKi));
       log("bước là: " + String(mainStep));
+      if (ketThucChuKi){
+        muiChiKetThucChuki ++;
+        log("đếm số mũi đầu ra là :" + String(muiChiKetThucChuki));
+      }
+      if (cheDoThoiHoi == 4 && !thoiHoiFull){
+        thoiHoiFull = true;
+        funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
+        log("thổi hơi full step");
+      }
     }
     lastStatusCountSensor = statusCountSensor;
   }
@@ -768,15 +801,22 @@ void funcCountSensor(){
 void mainRun(){
   switch (mainStep) {
     case 0:
+        catDauVaoChuKi = false;
+        catDauRaChuKi = false;
+        thoiDauVaoChuKi = false;
+        thoiDauRaChuKi = false;
       break;
-
     case 1: 
       if (cheDoHoatDong == 1 || cheDoHoatDong == 2 ) {
         if (!catDauVaoChuKi){
           if (soMuiChiTrongChuKi == soDuMuiDauVao){
-            funcKichHoatDaoCat();
-            log("Cắt đầu vào");
-            catDauVaoChuKi = true;
+            if (!ketThucChuKi && trangThaiNhanVai){
+              funcKichHoatDaoCat();
+              log("Cắt đầu vào");
+              catDauVaoChuKi = true;
+            } else {
+              catDauVaoChuKi = true;
+            }
           }
         }
       } else {
@@ -795,31 +835,9 @@ void mainRun(){
         mainStep ++;
       }
       break;
-
     case 2:
-      if (cheDoThoiHoi == 4){
-        funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
-        log("Thổi khi may");
-      }
-      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > 2 && !trangThaiNhanVai){
-        muiChiKetThucChuki = soMuiChiTrongChuKi;
-        mainStep ++;
-      }
-      break;
-
-    case 3:
-      if (cheDoHoatDong == 1 || cheDoHoatDong == 3){
-        if (!catDauRaChuKi){
-          if (soMuiChiTrongChuKi - muiChiKetThucChuki == soDuMuiDauRa){
-            funcKichHoatDaoCat();
-            log("Cắt đầu ra");
-            catDauRaChuKi = true;
-          }
-        }
-      } else {
-        catDauRaChuKi = true;
-      }
-      if (cheDoThoiHoi == 1 || cheDoThoiHoi == 3){
+      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && !trangThaiNhanVai){
+        if (cheDoThoiHoi == 1 || cheDoThoiHoi == 3){
         if (!thoiDauRaChuKi){
           funcKichHoatThoiHoi(thoiGianThoiHoiDauRa);
           log("Thổi đầu ra");
@@ -828,15 +846,30 @@ void mainRun(){
       } else {
         thoiDauRaChuKi = true;
       }
-      if (thoiDauRaChuKi && catDauRaChuKi){
         mainStep = 0;
-        catDauVaoChuKi = false;
-        catDauRaChuKi = false;
-        thoiDauVaoChuKi = false;
-        thoiDauRaChuKi = false;
+        ketThucChuKi = true;
+        muiChiKetThucChuki = 0;
       }
       break;
   }
+  if (ketThucChuKi) {
+    if (muiChiKetThucChuki == soDuMuiDauRa){
+        if (cheDoHoatDong == 1 || cheDoHoatDong == 3 ){
+          if (!catDauRaChuKi){
+              funcKichHoatDaoCat();
+              log("Cắt đầu ra");
+              catDauRaChuKi = true;
+          }
+        } else {
+          catDauRaChuKi = true;
+        }
+      ketThucChuKi = false;
+    }
+  }
+  if (thoiHoiFull){
+    /* code */
+  }
+  
 
   funcBlowAir();
   funcCut();
@@ -845,6 +878,8 @@ void mainRun(){
 void setup() {
 
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
+
+  log("Đang khởi động");
 
   u8g2.begin();  // Khởi tạo màn hình OLED
 
@@ -879,6 +914,10 @@ void setup() {
   pinMode(outRelayCut, OUTPUT);
   pinMode(outRelayAir, OUTPUT);
 
+  digitalWrite(outRelayCut,LOW);
+  digitalWrite(outRelayAir,LOW);
+
+
   if (!LittleFS.begin()) {
     showSetup("Error", "E003", "LittleFS Mount Failed");
     Serial.println("LittleFS Mount Failed");
@@ -890,6 +929,7 @@ void setup() {
         return;
     }
     Serial.println("Read Data From JsonString");
+    loadSetup();
     return;
   }
 
@@ -923,7 +963,7 @@ void setup() {
       }
   }
 
-  const size_t capacity = 1024;  // Kích thước buffer, có thể thay đổi theo dung lượng file
+  const size_t capacity = 4000;  // Kích thước buffer, có thể thay đổi theo dung lượng file
   char content[capacity];        // Mảng chứa nội dung file
 
   if (file) {
@@ -940,15 +980,29 @@ void setup() {
       Serial.println(error.f_str());
       return;
   }
+  
   // Nếu mọi thứ thành công, tiếp tục với quá trình cài đặt của bạn
 }
 
 void loop() {
-  btnMenu.tick();
-  btnSet.tick();
-  btnUp.tick();
-  btnDown.tick();
-  funcFabricSensor();
-  funcCountSensor();
-  mainRun();
+  switch (trangThaiHoatDong){
+  case 0:
+    
+    break;
+  case 1:
+    btnMenu.tick();
+    btnSet.tick();
+    btnUp.tick();
+    btnDown.tick();
+    funcFabricSensor();
+    funcCountSensor();
+    mainRun();
+    break;
+  case 2:
+
+    break;
+  default:
+    break;
+  }
+  
 }
