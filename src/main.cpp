@@ -818,7 +818,7 @@ void funcCountSensor(){
 void mainRun(){
   switch (mainStep) {
     case 0:
-      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu){
+      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && trangThaiNhanVai){
         mainStep ++;
         soMuiChiTrongChuKi = 0;
         log("Khởi tạo chu kì");
