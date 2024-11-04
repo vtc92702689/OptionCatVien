@@ -231,6 +231,8 @@ String keyStr;
 String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
 
 void loadSetup();
+int trangThaiHoatDong = 0;
+int mainStep = 0;
 
 bool isNumeric(const char* str) {
   // Chuỗi rỗng không được coi là số
@@ -580,6 +582,17 @@ void btnMenuClick() {
   } else if (displayScreen == "ScreenEdit") {
     loadJsonSettings();
     displayScreen = "ScreenCD";
+  } else if (displayScreen == "khoiDong" && mainStep == 0) {
+    trangThaiHoatDong = 0;
+    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+    displayScreen = "MENU";
+  } else if (displayScreen == "MENU" && mainStep == 0){
+    displayScreen= "hoatDong";
+    trangThaiHoatDong = 1;
+  } else if (displayScreen == "hoatDong" && mainStep == 0) {
+    trangThaiHoatDong = 0;
+    showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+    displayScreen = "MENU";
   }
 }
 
@@ -710,7 +723,7 @@ int thoiGianThoiHoiKhiChay = 5000;
 int soMuiChongNhieu = 2;
 
 // TỔNG HỢP THAM SỐ Ghi Nhớ
-int mainStep = 0;
+
 int soMuiChiTrongChuKi = 0;
 int muiChiCuoiCungThayDoiTrangThai = 0;
 int muiChiKetThucChuki = 0;
@@ -728,7 +741,6 @@ unsigned long thoiDiemCuoiDaoCat;
 unsigned long thoiDiemCuoiThoiHoi;
 int doTreThoiHoi;
 
-int trangThaiHoatDong = 0;
 
 
 void loadSetup(){
@@ -889,10 +901,6 @@ void mainRun(){
       ketThucChuKi = false;
     }
   }
-  if (thoiHoiFull){
-    /* code */
-  }
-  
 
   funcBlowAir();
   funcCut();
@@ -956,6 +964,11 @@ void setup() {
     return;
   }
 
+  // Thiết lập khi khởi động
+  showText("XIN CHAO","ESP32-OPTION-V1.0");
+  displayScreen = "khoiDong";
+  trangThaiHoatDong = 0;
+
   const char* filePath = "/config.json";
 
   // Kiểm tra tệp có thể đọc được không
@@ -1010,13 +1023,13 @@ void setup() {
 void loop() {
   switch (trangThaiHoatDong){
   case 0:
-    
-    break;
-  case 1:
     btnMenu.tick();
     btnSet.tick();
     btnUp.tick();
     btnDown.tick();
+    break;
+  case 1:
+    btnMenu.tick();
     funcFabricSensor();
     funcCountSensor();
     mainRun();
