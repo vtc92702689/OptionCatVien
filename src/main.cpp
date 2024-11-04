@@ -369,6 +369,26 @@ void showText(const char* title, const char* messenger){
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
+void showProgress(int parameter1, int parameter2, int parameter3) {
+  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
+  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
+
+  // Hiển thị thông số Total Stick
+  u8g2.drawStr(0, 18, "Total Stick: ");
+  u8g2.drawStr(100, 18, String(parameter1).c_str());  // Chuyển parameter1 thành chuỗi và hiển thị
+
+  // Hiển thị thông số Re.Stick
+  u8g2.drawStr(0, 36, "Re.Stick: ");
+  u8g2.drawStr(100, 36, String(parameter2).c_str());  // Chuyển parameter2 thành chuỗi và hiển thị
+
+  // Hiển thị thông số Count output
+  u8g2.drawStr(0, 54, "Count output: ");
+  u8g2.drawStr(100, 54, String(parameter3).c_str());  // Chuyển parameter3 thành chuỗi và hiển thị
+
+  u8g2.sendBuffer();  // Gửi dữ liệu từ bộ đệm lên màn hình
+}
+
+
 void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
   u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
   u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
@@ -758,15 +778,10 @@ void funcBlowAir() {
 void funcFabricSensor(){
   bool statusFabricSensor = digitalRead(sensorFabric);
   if (statusFabricSensor != lastStatusFabricSensor){
-    if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && statusFabricSensor){
+    if (statusFabricSensor){
       trangThaiNhanVai = true;
       log("Nhận vải");
-      if (mainStep == 0){
-        mainStep = 1;
-        soMuiChiTrongChuKi = 0;
-        log("Khởi tạo chu kì");
-        log("bước là: " + String(mainStep)); 
-      }
+      
     } else {
       trangThaiNhanVai = false;
       log("Không có vải");
@@ -784,6 +799,7 @@ void funcCountSensor(){
       soMuiChiTrongChuKi ++;
       log("số mũi chỉ trong chu kì là: " + String(soMuiChiTrongChuKi));
       log("bước là: " + String(mainStep));
+      showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
       if (ketThucChuKi){
         muiChiKetThucChuki ++;
         log("đếm số mũi đầu ra là :" + String(muiChiKetThucChuki));
@@ -793,18 +809,21 @@ void funcCountSensor(){
         funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
         log("thổi hơi full step");
       }
+    } else {
+      lastStatusCountSensor = statusCountSensor; // thêm trường hợp ngược này để tạo xong giả. khi nào test mạch thì xóa
     }
-    lastStatusCountSensor = statusCountSensor;
   }
 }
 
 void mainRun(){
   switch (mainStep) {
     case 0:
-        catDauVaoChuKi = false;
-        catDauRaChuKi = false;
-        thoiDauVaoChuKi = false;
-        thoiDauRaChuKi = false;
+      if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu){
+        mainStep ++;
+        soMuiChiTrongChuKi = 0;
+        log("Khởi tạo chu kì");
+        log("bước là: " + String(mainStep)); 
+      }
       break;
     case 1: 
       if (cheDoHoatDong == 1 || cheDoHoatDong == 2 ) {
@@ -845,7 +864,11 @@ void mainRun(){
         }
       } else {
         thoiDauRaChuKi = true;
-      }
+      } 
+        catDauVaoChuKi = false;
+        catDauRaChuKi = false;
+        thoiDauVaoChuKi = false;
+        thoiDauRaChuKi = false;
         mainStep = 0;
         ketThucChuKi = true;
         muiChiKetThucChuki = 0;
