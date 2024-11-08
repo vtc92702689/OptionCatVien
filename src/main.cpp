@@ -589,6 +589,7 @@ void btnMenuClick() {
   } else if (displayScreen == "MENU" && mainStep == 0){
     displayScreen= "hoatDong";
     trangThaiHoatDong = 1;
+    showText("OCV-V1.0", "RUN");
   } else if (displayScreen == "hoatDong" && mainStep == 0) {
     trangThaiHoatDong = 0;
     showList(menuIndex);  // Hiển thị danh sách menu hiện tại
@@ -740,7 +741,6 @@ bool ketThucChuKi = false;
 unsigned long thoiDiemCuoiDaoCat;
 unsigned long thoiDiemCuoiThoiHoi;
 int doTreThoiHoi;
-
 
 
 void loadSetup(){
@@ -960,7 +960,6 @@ void setup() {
         return;
     }
     Serial.println("Read Data From JsonString");
-    loadSetup();
     return;
   }
 
@@ -968,6 +967,7 @@ void setup() {
   showText("XIN CHAO","ESP32-OPTION-V1.0");
   displayScreen = "khoiDong";
   trangThaiHoatDong = 0;
+  loadSetup();
 
   const char* filePath = "/config.json";
 
