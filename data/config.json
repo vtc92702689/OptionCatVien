@@ -1,0 +1,193 @@
+{
+    "main": {
+      "main1": {
+        "text": "CAI DAT",
+        "key": "CD",
+        "children": {
+          "CD1": {
+            "key": "CD1",
+            "text": "C.Do Cat",
+            "defaultValue": 1,
+            "configuredValue": 1,
+            "minValue": 1,
+            "maxValue": 3,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": true,
+            "explanationDetails": "Vao&Ra,D.Vao,D.Ra"
+          },
+          "CD2": {
+            "key": "CD2",
+            "text": "Do tre dao - mili giay",
+            "defaultValue": 150,
+            "configuredValue": 150,
+            "minValue": 1,
+            "maxValue": 10000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD3": {
+            "key": "CD3",
+            "text": "Do tre dau cat vao - mui kim",
+            "defaultValue": 10,
+            "configuredValue": 10,
+            "minValue": 1,
+            "maxValue": 10000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD4": {
+            "key": "CD4",
+            "text": "Do tre cat dau ra - mui kim",
+            "defaultValue": 10,
+            "configuredValue": 10,
+            "minValue": 1,
+            "maxValue": 1000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD5": {
+            "key": "CD5",
+            "text": "C.Do Thoi",
+            "defaultValue": 1,
+            "configuredValue": 1,
+            "minValue": 1,
+            "maxValue": 4,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": true,
+            "explanationDetails": "Vao&Ra,D.Vao,D.Ra,Full"
+          },
+          "CD6": {
+            "key": "CD6",
+            "text": "Do tre thoi hoi dau vao",
+            "defaultValue": 1500,
+            "configuredValue": 1500,
+            "minValue": 100,
+            "maxValue": 10000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD7": {
+            "key": "CD7",
+            "text": "Do tre thoi hoi dau ra",
+            "defaultValue": 1500,
+            "configuredValue": 1500,
+            "minValue": 100,
+            "maxValue": 10000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD8": {
+            "key": "CD8",
+            "text": "Do tre thoi hoi khi may",
+            "defaultValue": 1500,
+            "configuredValue": 1500,
+            "minValue": 100,
+            "maxValue": 10000,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CD9": {
+            "key": "CD9",
+            "text": "So mui chong nhieu",
+            "defaultValue": 2,
+            "configuredValue": 2,
+            "minValue": 1,
+            "maxValue": 10,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          }
+        },
+        "totalChildren": 9
+      },
+      "main2": {
+        "text": "CHUC NANG",
+        "key": "CN",
+        "children": {
+          "CN1": {
+            "key": "CN1",
+            "text": "TEST MODE",
+            "defaultValue": 1,
+            "configuredValue": 1,
+            "minValue": 1,
+            "maxValue": 1,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CN2": {
+            "key": "CN2",
+            "text": "TEST INPUT",
+            "defaultValue": 0,
+            "configuredValue": 0,
+            "minValue": 0,
+            "maxValue": 0,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CN3": {
+            "key": "CN3",
+            "text": "TEST OUTPUT",
+            "defaultValue": 0,
+            "configuredValue": 0,
+            "minValue": 0,
+            "maxValue": 0,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          },
+          "CN4": {
+            "key": "CN4",
+            "text": "RESET",
+            "defaultValue": 0,
+            "configuredValue": 0,
+            "minValue": 0,
+            "maxValue": 1,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          }
+        },
+        "totalChildren": 4
+      },
+      "main3": {
+        "text": "GIOI THIEU",
+        "key": "GT",
+        "children": {
+          "GT1": {
+            "key": "GT1",
+            "text": "DKien Design",
+            "defaultValue": 1,
+            "configuredValue": 1,
+            "minValue": 1,
+            "maxValue": 1,
+            "accessAllowed": true,
+            "editAllowed": true,
+            "explanationMode": false,
+            "explanationDetails": ""
+          }
+        },
+        "totalChildren": 1
+      }
+    }
+  }
