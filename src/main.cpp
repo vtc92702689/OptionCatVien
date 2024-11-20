@@ -31,6 +31,9 @@ byte testModeStep = 0;
 byte mainStep = 0;
 byte testOutputStep = 0;
 
+byte maxTestModeStep = 0;
+byte maxTestOutputStep = 0;
+
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
 OneButton btnUp(36, false,false);
@@ -42,6 +45,7 @@ bool explanationMode; //logic chức năng diễn giải
 bool editAllowed; //logic chức năng chỉnh sửa
 bool hienThiTestOutput = false;
 bool daoTinHieuOutput = false;
+bool chayTestMode = false;
 
 
 const char* menu1;
@@ -369,8 +373,11 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
+  } else if (displayScreen == "screenTestMode" && testModeStep == 0){
+    loadJsonSettings();
+    displayScreen = "ScreenCD";
+    trangThaiHoatDong = 0;
   }
-  
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
@@ -396,9 +403,10 @@ void btnSetClick() {
     } else if (keyStr == "CN") {
       if (setupCodeStr == "CN1"){
         trangThaiHoatDong = 201;   //Trạng thái hoạt động 201 là trạng thái TestMode
-        columnIndex = 0;
-        showEdit(columnIndex);
-        displayScreen = "ScreenEdit";
+        testModeStep = 0;
+        chayTestMode = true;
+        showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
+        displayScreen = "screenTestMode";
       } else if (setupCodeStr == "CN2"){
         trangThaiHoatDong = 202;   //Trạng thái hoạt động 202 là trạng thái TEST IO INPUT
         showText("TEST I/O", "TEST I/O INPUT");
@@ -408,6 +416,10 @@ void btnSetClick() {
         testOutputStep = 0;
         displayScreen = "testOutput";
         hienThiTestOutput = true;
+      } else {
+        columnIndex = maxLength-1;
+        showEdit(columnIndex);
+        displayScreen = "ScreenEdit";
       }
     }
   } else if (displayScreen == "ScreenEdit")  {
@@ -426,17 +438,14 @@ void btnSetClick() {
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnSetLongPressStart() {
-  if (displayScreen = "ScreenEdit"){
+  if (displayScreen == "ScreenEdit"){
     if (keyStr == "CD"){
       jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
       log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
       loadJsonSettings();
-      loadSetup();
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
-      if (setupCodeStr == "CN2"){
-        /* code */
-      } else if (setupCodeStr == "CN4" && currentValue == 1){
+      if (setupCodeStr == "CN4" && currentValue == 1){
         reSet();
         showText("RESET","Tat May Khoi Dong Lai!");
         trangThaiHoatDong = 200;  //Trạng thái hoạt động 200 là reset, không cho phép thao tác nào
@@ -467,7 +476,7 @@ void btnUpClick() {
     }
     loadJsonSettings(); // Hiển thị giá trị thiết lập
   } else if (displayScreen == "ScreenEdit") {
-    if (keyStr = "CD"){
+    if (keyStr == "CD"){
       editValue("addition");
       log("Value:" + valueStr);
     } else if (keyStr == "CN") {
@@ -475,8 +484,21 @@ void btnUpClick() {
       log("Value:" + valueStr);
     }
   } else if (displayScreen == "testOutput"){
-    testOutputStep ++;
-    hienThiTestOutput = true;
+    if (testOutputStep == maxTestOutputStep){
+      testOutputStep = 0;
+      hienThiTestOutput = true;
+    } else {
+      testOutputStep ++;
+      hienThiTestOutput = true;
+    }
+  } else if (displayScreen == "screenTestMode"){
+    if (testModeStep < maxTestModeStep){
+      testModeStep ++;
+    } else {
+      testModeStep = 0;
+    }
+    chayTestMode = true;
+    showText("TEST MODE", String("Step " + String(testModeStep)).c_str());
   }
 }
 
@@ -514,8 +536,19 @@ void btnDownClick() {
       log("Value:" + valueStr);
     }
   } else if (displayScreen == "testOutput"){
-    testOutputStep --;
-    hienThiTestOutput = true;
+    if (testOutputStep == 0){
+      testOutputStep = maxTestOutputStep;
+      hienThiTestOutput = true;
+    } else {
+      testOutputStep --;
+      hienThiTestOutput = true;
+    }
+  } else if (displayScreen == "screenTestMode"){
+    if (testModeStep > 0){
+      /*testModeStep --;
+      chayTestMode = true;
+      showText("TEST MODE", String("Step " + String(testModeStep)).c_str());*/
+    }
   }
 }
 
@@ -529,6 +562,14 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
+
+void reSet(){
+  int totalPrmReSet = jsonDoc["main"]["main1"]["totalChildren"]; // Truy xuất tổng số lượng phần tử con mảng CD
+  for (size_t i = 0; i < totalPrmReSet; i++){
+    jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["configuredValue"] = jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["defaultValue"];
+  }
+  writeFile(jsonDoc,"/config.json");
+}
 //KHAI BÁO CHÂN IO Ở ĐÂY
 
 const int sensorCount = 17;
@@ -588,6 +629,7 @@ void testOutput(){
       if (hienThiTestOutput){
         bool tinHieuHienTai = digitalRead(outRelayCut);
         showText("IO 25: CUT", String(tinHieuHienTai).c_str());
+        maxTestOutputStep = 1;
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
         bool tinHieuHienTai = digitalRead(outRelayCut);
@@ -608,22 +650,12 @@ void testOutput(){
         daoTinHieuOutput = false;
       }
       break;
-    default:
-      if (testOutputStep == 1) {
-        testOutputStep = 0;
-      } else {
-        testOutputStep = 1;
-      }
-      break;
   }
 }
 
 
 void tinhToanCaiDat(){
 
-}
-void reSet(){
-   
 }
 
 void loadSetup(){
@@ -705,10 +737,20 @@ void funcCountSensor(){
         funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
         //log("thổi hơi full step");
       }
-    } 
+    }
     lastStatusCountSensor = statusCountSensor; 
-  }
+  }  else {
+      muiChiKetThucChuki ++;
+      soMuiChiTrongChuKi ++;
+      showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
+      if (muiChiKetThucChuki > 1000){
+        muiChiKetThucChuki = 0;
+        soMuiChiTrongChuKi = 0;
+      }
+      
+    }
 }
+
 
 void mainRun(){
   switch (mainStep) {
@@ -881,9 +923,16 @@ void loop() {
   case 2:
     
     break;
+  case 198:
+    btnMenu.tick();
+    break;
+  case 199:
+    btnMenu.tick();
+    break;
   case 200:
     break;
   case 201:
+    btnMenu.tick();
     break;
   case 202:
     btnMenu.tick();
