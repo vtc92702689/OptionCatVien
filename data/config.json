@@ -122,10 +122,10 @@
         "CN1": {
           "key": "CN1",
           "text": "TEST MODE",
-          "defaultValue": 0,
-          "configuredValue": 0,
-          "minValue": 0,
-          "maxValue": 0,
+          "defaultValue": 1,
+          "configuredValue": 1,
+          "minValue": 1,
+          "maxValue": 1,
           "accessAllowed": true,
           "editAllowed": true,
           "explanationMode": false,
@@ -166,9 +166,21 @@
           "editAllowed": true,
           "explanationMode": false,
           "explanationDetails": ""
+        },
+        "CN5": {
+          "key": "CN5",
+          "text": "OTA UPDATE",
+          "defaultValue": 0,
+          "configuredValue": 0,
+          "minValue": 0,
+          "maxValue": 0,
+          "accessAllowed": true,
+          "editAllowed": true,
+          "explanationMode": false,
+          "explanationDetails": ""
         }
       },
-      "totalChildren": 4
+      "totalChildren": 5
     },
     "main3": {
       "text": "GIOI THIEU",
@@ -176,37 +188,37 @@
       "children": {
         "GT1": {
           "key": "GT1",
-          "text": "Main 6x6 V1.0",
+          "text": "Vertion Code",
           "defaultValue": 0,
-          "configuredValue": 0,
+          "configuredValue": "v1.0.0",
           "minValue": 0,
           "maxValue": 0,
           "accessAllowed": true,
-          "editAllowed": true,
+          "editAllowed": false,
           "explanationMode": false,
           "explanationDetails": ""
         },
         "GT2": {
           "key": "GT2",
+          "text": "Board Model",
+          "defaultValue": 0,
+          "configuredValue": "v.6x6",
+          "minValue": 1,
+          "maxValue": 1,
+          "accessAllowed": true,
+          "editAllowed": false,
+          "explanationMode": false,
+          "explanationDetails": ""
+        },
+        "GT3": {
+          "key": "GT3",
           "text": "DKien Design",
           "defaultValue": 0,
           "configuredValue": 0,
           "minValue": 0,
           "maxValue": 0,
           "accessAllowed": true,
-          "editAllowed": true,
-          "explanationMode": false,
-          "explanationDetails": ""
-        },
-        "GT3": {
-          "key": "GT3",
-          "text": "Option Cat Vien",
-          "defaultValue": 0,
-          "configuredValue": 0,
-          "minValue": 0,
-          "maxValue": 0,
-          "accessAllowed": true,
-          "editAllowed": true,
+          "editAllowed": false,
           "explanationMode": false,
           "explanationDetails": ""
         }

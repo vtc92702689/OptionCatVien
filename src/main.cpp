@@ -3,36 +3,22 @@
 #include <ArduinoJson.h>
 #include <OneButton.h>
 #include <LittleFS.h>
+#include "ota.h"
 #include "func.h"  // Bao gồm file header func.h để sử dụng các hàm từ func.cpp
 
+
 //U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
-U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+//U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // Khởi tạo đối tượng màn hình OLED U8G2
+
+// Thông tin mạng WiFi và OTA
+
 
 
 StaticJsonDocument<200> jsonDoc;
 
 const char* jsonString = R"()";
-
-// Khai báo các nút
-
-int btnSetDebounceMill = 20;  // thời gian chống nhiễu phím
-int btnSetPressMill = 1000;  // thời gian nhấn giữ phím
-int pIndex = 1;
-int menuIndex = 1;
-int totalChildren; //Tổng số tệp con trong Func loadJsonSettings
-int maxValue = 0;
-int minValue = 0;
-int maxLength = 0; //Số kí tự hiển thị trên func showSetup
-int columnIndex = 0; // Biến theo dõi hàng hiện tại (0 = đơn vị, 1 = chục, ...)
-int currentValue;
-
-byte trangThaiHoatDong = 0;
-byte testModeStep = 0;
-byte mainStep = 0;
-byte testOutputStep = 0;
-
-byte maxTestModeStep = 0;
-byte maxTestOutputStep = 0;
+void tinhToanCaiDat();
+void loadSetup();
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -40,310 +26,6 @@ OneButton btnUp(36, false,false);
 OneButton btnDown(39, false,false);
 OneButton btnRun(32,false,false);
 OneButton btnEstop(33,false,false);
-
-bool explanationMode; //logic chức năng diễn giải
-bool editAllowed; //logic chức năng chỉnh sửa
-bool hienThiTestOutput = false;
-bool daoTinHieuOutput = false;
-bool chayTestMode = false;
-
-
-const char* menu1;
-const char* menu2;
-const char* menu3;
-const char* configFile = "/config.json";
-
-String displayScreen = "index";
-String setupCodeStr;
-String valueStr;
-String textExplanationMode;
-String textStr;
-String keyStr;
-String ListExp[10]; // Mảng để chứa các phần chức năng Diễn giải thông số
-
-void reSet();
-void loadSetup();
-
-void drawCenteredText(const char* text, int y) {
-  int screenWidth = u8g2.getDisplayWidth();
-  
-  // Đo độ rộng của chuỗi
-  int textWidth = u8g2.getStrWidth(text);
-  // Tính toán vị trí x để căn giữa
-  int x = (screenWidth - textWidth) / 2;
-  u8g2.drawStr(x, y, text);           // Vẽ chuỗi căn giữa
-}
-
-void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {   // Hàm wrapText để hiển thị văn bản xuống dòng nếu dài quá
-  int16_t cursorX = x;  // Vị trí x bắt đầu in
-  int16_t cursorY = y;  // Vị trí y bắt đầu in
-  const char* wordStart = text;  // Vị trí bắt đầu của từ trong chuỗi
-  const char* currentChar = text;  // Ký tự hiện tại đang xử lý
-
-  while (*currentChar) {     // Vòng lặp qua từng ký tự trong chuỗi
-    if (*currentChar == ' ' || *(currentChar + 1) == '\0') {    
-      char word[64];   // Tạo chuỗi tạm để chứa từ hiện tại
-      int len = currentChar - wordStart + 1;
-      strncpy(word, wordStart, len);
-      word[len] = '\0';
-
-      int16_t textWidth = u8g2.getStrWidth(word);  // Kiểm tra nếu từ có vừa với chiều rộng màn hình
-      if (cursorX + textWidth > maxWidth) {
-        cursorX = x;  // Nếu từ quá dài, xuống dòng
-        cursorY += lineHeight;  // Tăng vị trí y để xuống dòng
-      }
-
-      u8g2.drawStr(cursorX, cursorY, word);  // Vẽ từ lên màn hình
-      cursorX += textWidth;  // Cập nhật vị trí x cho từ tiếp theo
-      
-      if (*currentChar == ' ') {
-        cursorX += u8g2.getStrWidth(" ");  // Thêm khoảng trắng nếu ký tự là ' '
-      }
-
-      wordStart = currentChar + 1; // Di chuyển đến từ tiếp theo
-    }
-    currentChar++;  // Chuyển ký tự hiện tại sang ký tự tiếp theo
-  }
-}
-void log(String mes){
-  Serial.println(mes);
-}
-
-void writeFile(JsonDocument& doc, const char* path) {
-    File file = LittleFS.open(path, "w");
-    if (!file) {
-        Serial.println("Failed to open file for writing");
-        return;
-    }
-
-    // Chuyển đổi JSON thành chuỗi và ghi vào tệp
-    serializeJson(doc, file);
-    file.close();
-    Serial.println("File written successfully!");
-}
-
-void showList(int indexNum){
-  menu1 = jsonDoc["main"]["main1"]["text"];
-  menu2 = jsonDoc["main"]["main2"]["text"];
-  menu3 = jsonDoc["main"]["main3"]["text"];
-
-  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
-
-  
-  u8g2.drawStr(12, 16, menu1);  // Hiển thị danh mục 1
-  u8g2.drawStr(12, 32, menu2);  // Hiển thị danh mục 2
-  u8g2.drawStr(12, 48, menu3);  // Hiển thị danh mục 3
-
-  u8g2.drawStr(0, indexNum * 16, ">");  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
-  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
-}
-
-void showText(const char* title, const char* messenger){
-  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
-
-  drawCenteredText(title,18);
-  
-  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
-  wrapText(messenger, 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
-  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
-}
-
-void showProgress(int parameter1, int parameter2, int parameter3) {
-  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
-
-  // Hiển thị thông số Total Stick
-  u8g2.drawStr(0, 18, "Total Stick: ");
-  u8g2.drawStr(100, 18, String(parameter1).c_str());  // Chuyển parameter1 thành chuỗi và hiển thị
-
-  // Hiển thị thông số Re.Stick
-  u8g2.drawStr(0, 36, "Re.Stick: ");
-  u8g2.drawStr(100, 36, String(parameter2).c_str());  // Chuyển parameter2 thành chuỗi và hiển thị
-
-  // Hiển thị thông số Count output
-  u8g2.drawStr(0, 54, "Count output: ");
-  u8g2.drawStr(100, 54, String(parameter3).c_str());  // Chuyển parameter3 thành chuỗi và hiển thị
-
-  u8g2.sendBuffer();  // Gửi dữ liệu từ bộ đệm lên màn hình
-}
-
-void showSetup(const char* setUpCode, const char* value, const char* text) {   // Thêm maxValue vào tham số
-  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
-
-  char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
-  snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setUpCode);  // Nối mã cài đặt với dấu ":"
-  
-  u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
-  
-  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
-  
-  // Chuyển đổi maxValue sang chuỗi
-  char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
-  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
-  
-  // Tính toán độ dài của value và maxValueStr
-  int valueLength = strlen(value);
-  if (!isNumeric(value)){
-    maxLength = 5;
-  } else {
-    maxLength = strlen(maxValueStr);
-    // Giới hạn độ dài value không vượt quá chiều dài maxValue
-    if (valueLength > maxLength) {
-        valueLength = maxLength;
-    }
-  }
-
-  // Vị trí bắt đầu cho ký tự đầu tiên căn lề từ phải
-  int startX = 128 - 10; // Bắt đầu từ vị trí rìa phải (x = 118)
-
-  // Vẽ từng ký tự từ value lên màn hình, bắt đầu từ ký tự cuối cùng
-  for (int i = 0; i < valueLength; i++) {
-      char temp[2] = {value[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
-      u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
-  }
-
-  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình (tọa độ từ x=0 đến x=128)
-
-  wrapText(text, 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
-  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
-}
-
-void showEdit(int columnIndex) {
-  u8g2.clearBuffer();  // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3hb_tf);  // Thiết lập font chữ đậm
-  char tempSetUpCode[64];    // Tạo một chuỗi tạm chứa mã cài đặt và dấu ";"
-  snprintf(tempSetUpCode, sizeof(tempSetUpCode), "%s:", setupCodeStr.c_str());  // Nối mã cài đặt với dấu ":"
-  //log(setupCodeStr);
-  u8g2.drawStr(0, 18, tempSetUpCode);  // Hiển thị mã cài đặt (tại vị trí x=0, y=18)
-
-  u8g2.setFont(u8g2_font_crox3h_tf);  // Thiết lập font chữ thường (không đậm)
-
-  char maxValueStr[16]; // Chuỗi chứa giá trị maxValue sau khi chuyển đổi
-  snprintf(maxValueStr, sizeof(maxValueStr), "%d", maxValue);  // Chuyển maxValue thành chuỗi
-
-  const char* valueChr = valueStr.c_str();
-  int valueLength = strlen(valueChr);
-  maxLength = strlen(maxValueStr);
-
-  // Giới hạn độ dài value không vượt quá chiều dài maxValue
-  if (valueLength > maxLength) {
-      valueLength = maxLength;
-  }
-  log("Value[" +String(columnIndex)+"]");
-  int startX = 128 - 10; // 10 là độ rộng trung bình của một ký tự (nếu sử dụng font có kích thước tiêu chuẩn)
-
-    for (int i = 0; i < maxLength; i++) {
-      char temp[2] = {valueChr[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
-      if (i == columnIndex){
-        u8g2.setDrawColor(1);  // Màu nền
-        u8g2.drawBox(startX - (i * 10) - 1, 5, 10, 18);
-        u8g2.setDrawColor(0);  // Màu chữ
-        u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
-        u8g2.setDrawColor(1);
-      } else {
-        u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự lùi về bên trái
-      }
-    }
-
-  u8g2.drawLine(0, 23, 128, 23);  // Vẽ một đường ngang trên màn hình (tọa độ từ x=0 đến x=128)
-  wrapText(textStr.c_str(), 0, 42, 18, 128);  // Bắt đầu tại tọa độ x=0, y=46, mỗi dòng cách nhau 18 điểm, tối đa chiều rộng 128 điểm
-  u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
-}
-
-void loadJsonSettings() {
-    try {
-        const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"]; // Truy xuất key của mục menu hiện tại từ JSON
-        totalChildren = jsonDoc["main"]["main" + String(menuIndex)]["totalChildren"]; // Truy xuất tổng số lượng phần tử con
-        setupCodeStr = String(code) + String(pIndex); // Tạo setupCode dựa trên key và pIndex (số thứ tự)
-
-        // Kiểm tra xem configuredValue có phải là số hay không
-        if (jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"].is<int>()) {
-            // Nếu là số, chuyển đổi sang String
-            int valueInt = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"];
-            valueStr = String(valueInt); // Chuyển đổi value từ int thành String
-            currentValue = valueStr.toInt();
-        } else if (jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"].is<const char*>()) {
-            // Nếu là chuỗi, lấy giá trị trực tiếp
-            valueStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"].as<const char*>();
-            currentValue = -1;
-        } else {
-            valueStr = ""; // Gán giá trị mặc định nếu không phải số hoặc chuỗi
-        }
-
-        maxValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["maxValue"];
-        minValue = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["minValue"];
-        explanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationMode"];
-        editAllowed = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["editAllowed"];
-        if (explanationMode){
-          String listStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["explanationDetails"];
-          
-          splitString(listStr, ListExp, 10);
-          textExplanationMode = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>();
-          textStr = textExplanationMode +": " + ListExp[currentValue-1];  // Hiển thị text từ list
-        } else {
-          textStr = jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["text"].as<const char*>(); // Truy xuất text từ JSON
-        }
-        //log(textStr);
-
-        keyStr = String(code);
-        log("Truy cập thẻ " + keyStr + "/" + setupCodeStr);
-        showSetup(setupCodeStr.c_str(), valueStr.c_str() , textStr.c_str()); // Hiển thị thông tin cấu hình bằng cách gọi hàm showSetup
-    } catch (const std::exception& e) { // Bắt lỗi nếu có ngoại lệ
-        Serial.println("Error reading JSON data: "); // In thông báo lỗi
-        Serial.println(e.what()); // In thông tin chi tiết từ e.what()
-    } catch (...) { // Bắt mọi lỗi khác không thuộc std::exception
-        Serial.println("An unknown error occurred while reading JSON data."); // In thông báo lỗi chung
-    }
-}
-
-
-void editValue(const char* Calculations) {
-    int newValue;
-    int factor = pow(10, columnIndex); // Tính hàng (đơn vị, chục, trăm, v.v.)
-
-    // Tăng hoặc giảm giá trị tại hàng đang chọn
-    if (strcmp(Calculations, "addition") == 0) {
-        newValue = currentValue + factor;
-    } else if (strcmp(Calculations, "subtraction") == 0) {
-        newValue = currentValue - factor;
-    }
-
-    // Kiểm tra nếu newValue nằm trong khoảng minValue và maxValue
-    if (newValue >= minValue && newValue <= maxValue) {
-        currentValue = newValue; // Cập nhật currentValue nếu newValue hợp lệ
-    }
-
-    // Chuyển giá trị thành chuỗi để hiển thị
-    valueStr = String(currentValue);
-
-    // Kiểm tra chức năng diễn giải có hoạt động hay không, nếu hoạt động thì hiển thị diễn giải
-    if (explanationMode){
-      textStr = textExplanationMode + ": " +ListExp[currentValue-1];
-    }
-
-    // Gọi lại hàm showEdit để cập nhật màn hình
-    showEdit(columnIndex);
-}
-
-void readConfigFile() {
-  // Đọc nội dung file config.json
-  File config = LittleFS.open(configFile, "r");  // Mở file ở chế độ đọc
-  if (!config) {
-    Serial.println("Failed to open config file");
-    return;
-  }
-
-  // Đọc dữ liệu từ file
-  DeserializationError error = deserializeJson(jsonDoc, config);
-  if (error) {
-    Serial.println("Failed to read config file");
-    return;
-  }
-  config.close();
-}
 
 
 void btnMenuClick() {
@@ -353,6 +35,7 @@ void btnMenuClick() {
       writeFile(jsonDoc,"/config.json");
     }
     showList(menuIndex);  // Hiển thị danh sách menu hiện tại
+    trangThaiHoatDong = 0;
     displayScreen = "MENU";
   } else if (displayScreen == "ScreenEdit") {
     loadJsonSettings();
@@ -377,14 +60,16 @@ void btnMenuClick() {
     loadJsonSettings();
     displayScreen = "ScreenCD";
     trangThaiHoatDong = 0;
+  } else if (displayScreen == "OTA"){
+
   }
 }
 
 // Hàm callback khi bắt đầu nhấn giữ nút
 void btnMenuLongPressStart() {
-  //Serial.println("Button Long Press Started (BtnMenu)");
+  if (displayScreen == "OTA") {
+  }
 }
-
 // Hàm callback khi nút đang được giữ
 void btnMenuDuringLongPress() {
   //Serial.println("Button is being Long Pressed (BtnMenu)");
@@ -416,6 +101,10 @@ void btnSetClick() {
         testOutputStep = 0;
         displayScreen = "testOutput";
         hienThiTestOutput = true;
+      } else if ((setupCodeStr == "CN5")){
+        setupOTA();
+        displayScreen = "OTA";
+        trangThaiHoatDong = 204;  //Trạng thái hoạt động 204 là trạng thái OTA UPDATE+0
       } else {
         columnIndex = maxLength-1;
         showEdit(columnIndex);
@@ -441,8 +130,10 @@ void btnSetLongPressStart() {
   if (displayScreen == "ScreenEdit"){
     if (keyStr == "CD"){
       jsonDoc["main"]["main" + String(menuIndex)]["children"][setupCodeStr]["configuredValue"] = currentValue;
-      log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
+      //log("Đã lưu giá trị:" + String(currentValue) + " vào thẻ " + keyStr + "/" + setupCodeStr);
       loadJsonSettings();
+      loadSetup();
+      tinhToanCaiDat();
       displayScreen = "ScreenCD";
     } else if (keyStr == "CN"){
       if (setupCodeStr == "CN4" && currentValue == 1){
@@ -562,17 +253,9 @@ void btnDownDuringLongPress() {
   //Serial.println("Button is being Long Pressed (btnDown)");
 }
 
-
-void reSet(){
-  int totalPrmReSet = jsonDoc["main"]["main1"]["totalChildren"]; // Truy xuất tổng số lượng phần tử con mảng CD
-  for (size_t i = 0; i < totalPrmReSet; i++){
-    jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["configuredValue"] = jsonDoc["main"]["main1"]["children"]["CD"+String(i + 1)]["defaultValue"];
-  }
-  writeFile(jsonDoc,"/config.json");
-}
 //KHAI BÁO CHÂN IO Ở ĐÂY
 
-const int sensorCount = 17;
+const int sensorCount = 23;
 const int sensorFabric = 16;
 const int outRelayCut = 25;
 const int outRelayAir = 26;
@@ -610,45 +293,114 @@ int doTreThoiHoi;
 
 //TRƯƠNG TRÌNH NGƯỜI DÙNG LẬP TRÌNH
 
-void testInput(){
-  static bool trangthaiCuoiIO1;
-  if (digitalRead(sensorCount)!= trangthaiCuoiIO1){
-    trangthaiCuoiIO1 = digitalRead(sensorCount);
-    showText("IO 17" , String(trangthaiCuoiIO1).c_str());
-  }
-  static bool trangthaiCuoiIO2;
-  if (digitalRead(sensorFabric)!= trangthaiCuoiIO2){
-    trangthaiCuoiIO2 = digitalRead(sensorFabric);
-    showText("IO 16" , String(trangthaiCuoiIO2).c_str());
+
+void testMode(){
+  switch (testModeStep){
+  case 0:
+    if(chayTestMode){
+      maxTestModeStep = 2;
+      chayTestMode = false;
+    }
+    break;
+
+  case 1:
+    if (chayTestMode){
+      /* code */
+    }
+    break;
+  case 2:
+    /* code */
+    break;
+  default:
+    /* code */
+    break;
   }
 }
 
+void testInput(){
+  static bool trangthaiCuoiIO1;
+  if (digitalRead(23)!= trangthaiCuoiIO1){
+    trangthaiCuoiIO1 = digitalRead(23);
+    showText("IO 23" , String(trangthaiCuoiIO1).c_str());
+  }
+  static bool trangthaiCuoiIO2;
+  if (digitalRead(16)!= trangthaiCuoiIO2){
+    trangthaiCuoiIO2 = digitalRead(16);
+    showText("IO 16" , String(trangthaiCuoiIO2).c_str());
+  }
+  static bool trangthaiCuoiIO3;
+  if (digitalRead(4)!= trangthaiCuoiIO3){
+    trangthaiCuoiIO3 = digitalRead(4);
+    showText("IO 04" , String(trangthaiCuoiIO3).c_str());
+  }
+  static bool trangthaiCuoiIO4;
+  if (digitalRead(0)!= trangthaiCuoiIO4){
+    trangthaiCuoiIO4 = digitalRead(0);
+    showText("IO 00" , String(trangthaiCuoiIO4).c_str());
+  }
+  static bool trangthaiCuoiIO5;
+  if (digitalRead(2)!= trangthaiCuoiIO5){
+    trangthaiCuoiIO5 = digitalRead(2);
+    showText("IO 02" , String(trangthaiCuoiIO5).c_str());
+  }
+  static bool trangthaiCuoiIO6;
+  if (digitalRead(15)!= trangthaiCuoiIO6){
+    trangthaiCuoiIO6 = digitalRead(15);
+    showText("IO 15" , String(trangthaiCuoiIO6).c_str());
+  }
+}
 void testOutput(){
   switch (testOutputStep){
     case 0:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayCut);
-        showText("IO 25: CUT", String(tinHieuHienTai).c_str());
-        maxTestOutputStep = 1;
+        maxTestOutputStep = 3;
+        bool tinHieuHienTai = digitalRead(25);
+        showText("IO 25", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayCut);
-        digitalWrite(outRelayCut,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(25);
+        digitalWrite(25,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
       break;
     case 1:
       if (hienThiTestOutput){
-        bool tinHieuHienTai = digitalRead(outRelayAir);
-        showText("IO 26: AIR", String(tinHieuHienTai).c_str());
+        bool tinHieuHienTai = digitalRead(26);
+        showText("IO 26", String(tinHieuHienTai).c_str());
         hienThiTestOutput = false;
       } else if (daoTinHieuOutput){
-        bool tinHieuHienTai = digitalRead(outRelayAir);
-        digitalWrite(outRelayAir,!tinHieuHienTai);
+        bool tinHieuHienTai = digitalRead(26);
+        digitalWrite(26,!tinHieuHienTai);
         hienThiTestOutput = true;
         daoTinHieuOutput = false;
       }
+      break;
+    case 2:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(27);
+        showText("IO 27", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(27);
+        digitalWrite(27,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    case 3:
+      if (hienThiTestOutput){
+        bool tinHieuHienTai = digitalRead(14);
+        showText("IO 14", String(tinHieuHienTai).c_str());
+        hienThiTestOutput = false;
+      } else if (daoTinHieuOutput){
+        bool tinHieuHienTai = digitalRead(14);
+        digitalWrite(14,!tinHieuHienTai);
+        hienThiTestOutput = true;
+        daoTinHieuOutput = false;
+      }
+      break;
+    default:
       break;
   }
 }
@@ -723,11 +475,12 @@ void funcFabricSensor(){
 void funcCountSensor(){
   bool statusCountSensor = digitalRead(sensorCount);
   if (statusCountSensor != lastStatusCountSensor){
+    soMuiChiTrongChuKi ++;
+    showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
     if (statusCountSensor){
-      soMuiChiTrongChuKi ++;
+      
       //log("số mũi chỉ trong chu kì là: " + String(soMuiChiTrongChuKi));
       //log("bước là: " + String(mainStep));
-      showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
       if (ketThucChuKi){
         muiChiKetThucChuki ++;
         //log("đếm số mũi đầu ra là :" + String(muiChiKetThucChuki));
@@ -737,20 +490,10 @@ void funcCountSensor(){
         funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
         //log("thổi hơi full step");
       }
-    }
+    } 
     lastStatusCountSensor = statusCountSensor; 
-  }  else {
-      muiChiKetThucChuki ++;
-      soMuiChiTrongChuKi ++;
-      showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
-      if (muiChiKetThucChuki > 1000){
-        muiChiKetThucChuki = 0;
-        soMuiChiTrongChuKi = 0;
-      }
-      
-    }
+  }
 }
-
 
 void mainRun(){
   switch (mainStep) {
@@ -869,8 +612,18 @@ void setup() {
 
   pinMode(sensorFabric, INPUT);
   pinMode(sensorCount, INPUT);
+  pinMode(4, INPUT);
+  pinMode(0, INPUT);
+  pinMode(2, INPUT);
+  pinMode(5, INPUT);
+
+
   pinMode(outRelayCut, OUTPUT);
   pinMode(outRelayAir, OUTPUT);
+  pinMode(27, OUTPUT);
+  pinMode(14, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
 
   digitalWrite(outRelayCut,LOW);
   digitalWrite(outRelayAir,LOW);
@@ -923,28 +676,29 @@ void loop() {
   case 2:
     
     break;
-  case 198:
+  case 200:        //ESTOP dừng khẩn cấp
     btnMenu.tick();
     break;
-  case 199:
+  case 201:         // Func Test Mode
     btnMenu.tick();
+    btnUp.tick();
+    btnDown.tick();
+    testMode();
     break;
-  case 200:
-    break;
-  case 201:
-    btnMenu.tick();
-    break;
-  case 202:
+  case 202:        // Func Test Input
     btnMenu.tick();
     testInput();
     break;
-  case 203:
+  case 203:      // Func Test Output
     btnMenu.tick();
     btnSet.tick();
     btnUp.tick();
     btnDown.tick();
     testOutput();
     break;
+  case 204:
+    handleOTA(); // Xử lý OTA khi điều kiện đúng
+    break;  
   default:
     break;
   }
