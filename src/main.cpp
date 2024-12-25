@@ -13,12 +13,15 @@
 // Thông tin mạng WiFi và OTA
 
 
+// Khai báo task handle
+TaskHandle_t TaskCountSensorHandle = NULL;
 
 StaticJsonDocument<200> jsonDoc;
 
 const char* jsonString = R"()";
 void tinhToanCaiDat();
 void loadSetup();
+void funcCountSensor();
 
 OneButton btnMenu(34, false,false);
 OneButton btnSet(35, false,false);
@@ -272,11 +275,14 @@ int thoiGianThoiHoiDauRa = 3000;
 int thoiGianThoiHoiKhiChay = 5000;
 int soMuiChongNhieu = 2;
 
+int muiChiChuKiTruoc =0;
+
 // TỔNG HỢP THAM SỐ Ghi Nhớ
 
-int soMuiChiTrongChuKi = 0;
-int muiChiCuoiCungThayDoiTrangThai = 0;
-int muiChiKetThucChuki = 0;
+unsigned long soMuiChiTrongChuKi = 0;
+unsigned long muiChiCuoiCungThayDoiTrangThai = 0;
+unsigned long muiChiBatDauChuKi = 0;
+unsigned long muiChiKetThucChuKi = 0;
 
 bool catDauVaoChuKi = false;
 bool catDauRaChuKi = false;
@@ -405,6 +411,12 @@ void testOutput(){
   }
 }
 
+void TaskCountSensor(void *pvParameters) {
+  while (1) {
+    funcCountSensor();
+    vTaskDelay(1); // Điều chỉnh độ trễ nếu cần
+  }
+}
 
 void tinhToanCaiDat(){
 
@@ -472,18 +484,18 @@ void funcFabricSensor(){
   }
 }
 
-void funcCountSensor(){
+/*void funcCountSensor(){
   bool statusCountSensor = digitalRead(sensorCount);
   if (statusCountSensor != lastStatusCountSensor){
     soMuiChiTrongChuKi ++;
-    showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuki);
+    showProgress(soMuiChiTrongChuKi,muiChiCuoiCungThayDoiTrangThai,muiChiKetThucChuKi);
     if (statusCountSensor){
       
       //log("số mũi chỉ trong chu kì là: " + String(soMuiChiTrongChuKi));
       //log("bước là: " + String(mainStep));
       if (ketThucChuKi){
-        muiChiKetThucChuki ++;
-        //log("đếm số mũi đầu ra là :" + String(muiChiKetThucChuki));
+        muiChiKetThucChuKi ++;
+        //log("đếm số mũi đầu ra là :" + String(muiChiKetThucChuKi));
       }
       if (cheDoThoiHoi == 4 && !thoiHoiFull){
         thoiHoiFull = true;
@@ -493,6 +505,31 @@ void funcCountSensor(){
     } 
     lastStatusCountSensor = statusCountSensor; 
   }
+}*/
+
+void funcCountSensor(){
+  bool statusCountSensor = digitalRead(sensorCount);
+  if (statusCountSensor != lastStatusCountSensor) {
+    soMuiChiTrongChuKi ++;
+    lastStatusCountSensor = statusCountSensor;
+  }
+}
+
+void funcKetThucChuKy(){
+  if (ketThucChuKi) {
+    if (soMuiChiTrongChuKi - muiChiKetThucChuKi > soDuMuiDauRa){
+        if (cheDoHoatDong == 1 || cheDoHoatDong == 3 ){
+          if (!catDauRaChuKi){
+              funcKichHoatDaoCat();
+              //log("Cắt đầu ra");
+              catDauRaChuKi = true;
+          }
+        } else {
+          catDauRaChuKi = true;
+        }
+      ketThucChuKi = false;
+    }
+  }
 }
 
 void mainRun(){
@@ -500,7 +537,8 @@ void mainRun(){
     case 0:
       if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && trangThaiNhanVai){
         mainStep ++;
-        soMuiChiTrongChuKi = 0;
+        muiChiBatDauChuKi = soMuiChiTrongChuKi;
+        //soMuiChiTrongChuKi = 0;
         //log("Khởi tạo chu kì");
         //log("bước là: " + String(mainStep)); 
       }
@@ -508,7 +546,7 @@ void mainRun(){
     case 1: 
       if (cheDoHoatDong == 1 || cheDoHoatDong == 2 ) {
         if (!catDauVaoChuKi){
-          if (soMuiChiTrongChuKi == soDuMuiDauVao){
+          if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soDuMuiDauVao){
             if (!ketThucChuKi && trangThaiNhanVai){
               funcKichHoatDaoCat();
               //log("Cắt đầu vào");
@@ -538,40 +576,36 @@ void mainRun(){
     case 2:
       if (soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai > soMuiChongNhieu && !trangThaiNhanVai){
         if (cheDoThoiHoi == 1 || cheDoThoiHoi == 3){
-        if (!thoiDauRaChuKi){
-          funcKichHoatThoiHoi(thoiGianThoiHoiDauRa);
-          //log("Thổi đầu ra");
+          if (!thoiDauRaChuKi){
+            funcKichHoatThoiHoi(thoiGianThoiHoiDauRa);
+            //log("Thổi đầu ra");
+            thoiDauRaChuKi = true;
+          }
+        } else {
           thoiDauRaChuKi = true;
         }
-      } else {
-        thoiDauRaChuKi = true;
-      } 
         catDauVaoChuKi = false;
         catDauRaChuKi = false;
         thoiDauVaoChuKi = false;
         thoiDauRaChuKi = false;
-        mainStep = 0;
         ketThucChuKi = true;
-        muiChiKetThucChuki = 0;
+        muiChiKetThucChuKi = soMuiChiTrongChuKi;
+        muiChiChuKiTruoc = muiChiKetThucChuKi - muiChiBatDauChuKi;
+        mainStep = 0;
       }
       break;
   }
-  if (ketThucChuKi) {
-    if (muiChiKetThucChuki == soDuMuiDauRa){
-        if (cheDoHoatDong == 1 || cheDoHoatDong == 3 ){
-          if (!catDauRaChuKi){
-              funcKichHoatDaoCat();
-              //log("Cắt đầu ra");
-              catDauRaChuKi = true;
-          }
-        } else {
-          catDauRaChuKi = true;
-        }
-      ketThucChuKi = false;
-    } else {
-      funcCut();
+  static unsigned long muiCuoiHienThi;
+  if (muiCuoiHienThi != soMuiChiTrongChuKi){
+    if (cheDoThoiHoi == 4 && !thoiHoiFull){
+      thoiHoiFull = true;
+      funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
+      //log("thổi hơi full step");
     }
+    showProgress(soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai,muiChiChuKiTruoc,trangThaiNhanVai);
+    muiCuoiHienThi = soMuiChiTrongChuKi;
   }
+  funcKetThucChuKy();
   funcBlowAir();
   funcCut();
 }
@@ -657,6 +691,8 @@ void setup() {
 
   Serial.println("Load toàn bộ dữ liệu thành công");
   khoiDong();
+
+  xTaskCreatePinnedToCore(TaskCountSensor, "TaskCountSensor", 10000, NULL, 2, &TaskCountSensorHandle, 0); // Task ưu tiên 2
 }
 
 void loop() {
@@ -670,7 +706,7 @@ void loop() {
   case 1:
     btnMenu.tick();
     funcFabricSensor();
-    funcCountSensor();
+    //funcCountSensor();
     mainRun();
     break;
   case 2:
