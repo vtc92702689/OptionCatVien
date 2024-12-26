@@ -439,6 +439,7 @@ void loadSetup(){
 }
 
 void khoiDong(){
+  lastStatusCountSensor = digitalRead(sensorCount);
   displayScreen = "index";
   showText("HELLO","ESP32-OPTION");
   mainStep = 0;
@@ -597,10 +598,13 @@ void mainRun(){
   }
   static unsigned long muiCuoiHienThi;
   if (muiCuoiHienThi != soMuiChiTrongChuKi){
-    if (cheDoThoiHoi == 4 && !thoiHoiFull){
-      thoiHoiFull = true;
-      funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
-      //log("thổi hơi full step");
+    if (cheDoThoiHoi == 4){
+      if (!thoiHoiFull){
+        thoiHoiFull = true;
+        funcKichHoatThoiHoi(thoiGianThoiHoiKhiChay);
+      } else {
+        thoiDiemCuoiThoiHoi = millis();
+      }
     }
     showProgress(soMuiChiTrongChuKi - muiChiCuoiCungThayDoiTrangThai,muiChiChuKiTruoc,trangThaiNhanVai);
     muiCuoiHienThi = soMuiChiTrongChuKi;
