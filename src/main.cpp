@@ -433,9 +433,6 @@ void loadSetup(){
    thoiGianThoiHoiDauRa = jsonDoc["main"]["main1"]["children"]["CD7"]["configuredValue"];
    thoiGianThoiHoiKhiChay = jsonDoc["main"]["main1"]["children"]["CD8"]["configuredValue"];
    soMuiChongNhieu = jsonDoc["main"]["main1"]["children"]["CD9"]["configuredValue"];
-
-  tinhToanCaiDat();
-  trangThaiHoatDong = 1;
 }
 
 void khoiDong(){
@@ -445,6 +442,8 @@ void khoiDong(){
   mainStep = 0;
   trangThaiHoatDong = 0;
   loadSetup();
+  tinhToanCaiDat();
+  trangThaiHoatDong = 1;
 }
 
 void funcKichHoatDaoCat(){
