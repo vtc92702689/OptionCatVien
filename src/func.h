@@ -3,6 +3,7 @@
 
 #include <U8g2lib.h> // Bao gồm thư viện U8g2 để điều khiển màn hình OLED
 #include <ArduinoJson.h> // Bao gồm thư viện ArduinoJson để làm việc với JSON
+#include <LittleFS.h>
 
 // Khai báo các hàm trong func.cpp
 bool isNumeric(const char* str); 

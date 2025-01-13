@@ -1,6 +1,4 @@
 #include "func.h"
-#include <Arduino.h>
-#include <LittleFS.h>
 
 // Định nghĩa các biến toàn cục
 int btnSetDebounceMill = 20; // Thời gian chống nhiễu cho nút bấm, tránh ghi nhận nhiều lần nhấn do nhiễu
@@ -40,6 +38,7 @@ String textExplanationMode;     // Chuỗi mô tả chế độ giải thích, c
 String textStr;                 // Chuỗi mô tả, chứa thông tin văn bản hiển thị trên màn hình
 String keyStr;                  // Chuỗi khóa, dùng để lưu trữ khóa của mục cài đặt trong tài liệu JSON
 String ListExp[10];             // Mảng chứa các phần chức năng giải thích thông số, chứa các mục giải thích cho mục cài đặt
+
 
 // Hàm kiểm tra một chuỗi có phải là số hay không
 bool isNumeric(const char* str) {
@@ -92,6 +91,7 @@ void drawCenteredText(const char* text, int y) {
 
 // Hàm hiển thị văn bản xuống dòng nếu dài quá
 void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_t maxWidth) {
+  u8g2.setFont(u8g2_font_unifont_t_vietnamese1); // Thiết lập font chữ thường (không đậm)
   int16_t cursorX = x; // Vị trí x bắt đầu in
   int16_t cursorY = y; // Vị trí y bắt đầu in
   const char* wordStart = text; // Vị trí bắt đầu của từ trong chuỗi
@@ -107,12 +107,18 @@ void wrapText(const char* text, int16_t x, int16_t y, int16_t lineHeight, int16_
         cursorX = x; // Xuống dòng
         cursorY += lineHeight; // Tăng vị trí y
       }
-      u8g2.drawStr(cursorX, cursorY, word); // Vẽ từ lên màn hình
+
+      u8g2.setCursor(cursorX, cursorY); // Đặt vị trí con trỏ 
+      u8g2.print(word); // Hiển thị từ lên màn hình
+
+      //u8g2.drawStr(cursorX, cursorY, word); // Vẽ từ lên màn hình
       cursorX += textWidth; // Cập nhật vị trí x
       if (*currentChar == ' ') {
-        cursorX += u8g2.getStrWidth(" "); // Thêm khoảng trắng
+        // Chỉ thêm khoảng trắng khi ký tự hiện tại là khoảng trắng
+        wordStart = currentChar + 1; // Di chuyển đến từ tiếp theo
+        //cursorX += u8g2.getStrWidth(" "); // Thêm khoảng trắng
       }
-      wordStart = currentChar + 1; // Di chuyển đến từ tiếp theo
+      //wordStart = currentChar + 1; // Di chuyển đến từ tiếp theo
     }
     currentChar++; // Chuyển ký tự hiện tại sang ký tự tiếp theo
   }
@@ -142,13 +148,22 @@ void showList(int indexNum) {
   menu3 = jsonDoc["main"]["main3"]["text"]; // Lấy nội dung của menu 3 từ JSON
 
   u8g2.clearBuffer(); // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3h_tf); // Thiết lập font chữ thường (không đậm)
+  u8g2.setFont(u8g2_font_unifont_t_vietnamese1); // Thiết lập font chữ thường (không đậm)
 
-  u8g2.drawStr(12, 16, menu1); // Hiển thị danh mục 1
+  u8g2.setCursor(12, 16); // Đặt vị trí con trỏ
+  u8g2.print(menu1); // Hiển thị danh mục 1
+  u8g2.setCursor(12, 32); // Đặt vị trí con trỏ
+  u8g2.print(menu2); // Hiển thị danh mục 2
+  u8g2.setCursor(12, 48); // Đặt vị trí con trỏ
+  u8g2.print(menu3); // Hiển thị danh mục 3
+  u8g2.setCursor(0, indexNum * 16); // Đặt vị trí con trỏ cho dấu nhắc 
+  u8g2.print(">"); // Hiển thị dấu nhắc tại vị trí mục đã chọn
+
+  /*u8g2.drawStr(12, 16, menu1); // Hiển thị danh mục 1
   u8g2.drawStr(12, 32, menu2); // Hiển thị danh mục 2
   u8g2.drawStr(12, 48, menu3); // Hiển thị danh mục 3
+  u8g2.drawStr(0, indexNum * 16, ">"); // Hiển thị dấu nhắc tại vị trí mục đã chọn*/
 
-  u8g2.drawStr(0, indexNum * 16, ">"); // Hiển thị dấu nhắc tại vị trí mục đã chọn
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
@@ -159,7 +174,7 @@ void showText(const char* title, const char* messenger) {
 
   drawCenteredText(title, 18); // Vẽ tiêu đề căn giữa
 
-  u8g2.setFont(u8g2_font_crox3h_tf); // Thiết lập font chữ thường (không đậm)
+  u8g2.setFont(u8g2_font_unifont_t_vietnamese1); // Thiết lập font chữ thường (không đậm)
   wrapText(messenger, 0, 42, 18, 128); // Hiển thị nội dung văn bản xuống dòng nếu dài quá
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
@@ -167,19 +182,26 @@ void showText(const char* title, const char* messenger) {
 // Hàm hiển thị tiến trình
 void showProgress(int parameter1, int parameter2, int parameter3) {
   u8g2.clearBuffer(); // Xóa bộ nhớ đệm của màn hình để vẽ mới
-  u8g2.setFont(u8g2_font_crox3h_tf); // Thiết lập font chữ thường (không đậm)
+  u8g2.setFont(u8g2_font_unifont_t_vietnamese1); // Thiết lập font chữ thường (không đậm)
 
-  u8g2.drawStr(0, 18, "Total Stick: "); // Hiển thị tiêu đề tổng số
-  u8g2.drawStr(100, 18, String(parameter1).c_str()); // Hiển thị giá trị tổng số
+  u8g2.setCursor(0, 18); // Đặt vị trí con trỏ
+  u8g2.print("Total Stick: "); // Hiển thị tiêu đề tổng số
+  u8g2.setCursor(100, 18); // Đặt vị trí con trỏ cho giá trị
+  u8g2.print(parameter1); // Hiển thị giá trị tổng số
 
-  u8g2.drawStr(0, 36, "Re.Stick: "); // Hiển thị tiêu đề Re.Stick
-  u8g2.drawStr(100, 36, String(parameter2).c_str()); // Hiển thị giá trị Re.Stick
+  u8g2.setCursor(0, 36); // Đặt vị trí con trỏ
+  u8g2.print("Re.Stick: "); // Hiển thị tiêu đề Re.Stick
+  u8g2.setCursor(100, 36); // Đặt vị trí con trỏ cho giá trị
+  u8g2.print(parameter2); // Hiển thị giá trị Re.Stick
 
-  u8g2.drawStr(0, 54, "Count output: "); // Hiển thị tiêu đề Count output
-  u8g2.drawStr(100, 54, String(parameter3).c_str()); // Hiển thị giá trị Count output
+  u8g2.setCursor(0, 54); // Đặt vị trí con trỏ
+  u8g2.print("Count output: "); // Hiển thị tiêu đề Count output
+  u8g2.setCursor(100, 54); // Đặt vị trí con trỏ cho giá trị
+  u8g2.print(parameter3); // Hiển thị giá trị Count output
 
   u8g2.sendBuffer(); // Gửi dữ liệu từ bộ đệm lên màn hình
 }
+
 
 // Hàm hiển thị cài đặt
 void showSetup(const char* setUpCode, const char* value, const char* text) {
@@ -234,7 +256,7 @@ void showEdit(int columnIndex) {
 
   const char* valueChr = valueStr.c_str(); // Lấy giá trị hiện tại
   int valueLength = strlen(valueChr); // Độ dài của giá trị hiện tại
-  maxLength = strlen(maxValueStr); // Độ dài tối đa của giá trị
+  int maxLength = strlen(maxValueStr); // Độ dài tối đa của giá trị
 
   if (valueLength > maxLength) {
     valueLength = maxLength;
@@ -243,10 +265,17 @@ void showEdit(int columnIndex) {
   int startX = 128 - 10; // Bắt đầu từ vị trí rìa phải
 
   for (int i = 0; i < maxLength; i++) {
-    char temp[2] = {valueChr[valueLength - 1 - i], '\0'}; // Lấy ký tự theo thứ tự ngược lại
+    char temp[2] = {'\0', '\0'}; // Khởi tạo chuỗi tạm với giá trị mặc định
+
+    if (i < valueLength) {
+      temp[0] = valueChr[valueLength - 1 - i]; // Lấy ký tự theo thứ tự ngược lại
+    } else {
+      temp[0] = ' '; // Nếu không có giá trị thì mặc định là khoảng trắng
+    }
+
     if (i == columnIndex) {
       u8g2.setDrawColor(1); // Đặt màu nền
-      u8g2.drawBox(startX - (i * 10) - 1, 5, 10, 18); // Vẽ ô vuông làm nền
+      u8g2.drawBox(startX - (i * 10), 5, 9, 15); // Vẽ ô vuông làm nền
       u8g2.setDrawColor(0); // Đặt màu chữ
       u8g2.drawStr(startX - (i * 10), 18, temp); // Vẽ ký tự
       u8g2.setDrawColor(1); // Khôi phục màu nền
@@ -261,8 +290,9 @@ void showEdit(int columnIndex) {
   u8g2.sendBuffer(); // Gửi nội dung đệm ra màn hình
 }
 
+
+
 // Hàm tải cấu hình từ JSON
-// Hàm tải cấu hình từ JSON (tiếp tục)
 void loadJsonSettings() {
   try {
     const char* code = jsonDoc["main"]["main" + String(menuIndex)]["key"]; // Lấy key của menu hiện tại từ JSON

@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include <U8g2lib.h>
-#include <ArduinoJson.h>
 #include <OneButton.h>
-#include <LittleFS.h>
 #include "ota.h"
 #include "func.h"  // Bao gồm file header func.h để sử dụng các hàm từ func.cpp
 
@@ -620,6 +617,7 @@ void setup() {
   Serial.begin(115200);     // Khởi tạo Serial và màn hình
 
   u8g2.begin();  // Khởi tạo màn hình OLED
+  u8g2.enableUTF8Print(); // Kích hoạt hỗ trợ UTF-8
 
   btnMenu.attachClick(btnMenuClick);
   btnMenu.attachLongPressStart(btnMenuLongPressStart);
