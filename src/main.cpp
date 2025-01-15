@@ -255,7 +255,7 @@ void btnDownDuringLongPress() {
 
 //KHAI BÁO CHÂN IO Ở ĐÂY
 
-const int sensorCount = 23;
+const int sensorCount = 17;
 const int sensorFabric = 16;
 const int outRelayCut = 25;
 const int outRelayAir = 26;
@@ -322,9 +322,9 @@ void testMode(){
 
 void testInput(){
   static bool trangthaiCuoiIO1;
-  if (digitalRead(23)!= trangthaiCuoiIO1){
-    trangthaiCuoiIO1 = digitalRead(23);
-    showText("IO 23" , String(trangthaiCuoiIO1).c_str());
+  if (digitalRead(17)!= trangthaiCuoiIO1){
+    trangthaiCuoiIO1 = digitalRead(17);
+    showText("IO 17" , String(trangthaiCuoiIO1).c_str());
   }
   static bool trangthaiCuoiIO2;
   if (digitalRead(16)!= trangthaiCuoiIO2){
